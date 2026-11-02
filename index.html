@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>MY Task Manager - نظام إدارة المهام</title>
+
+    <!-- 🌟 لوغو MY المصغر لشريط المتصفح 🌟 -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=11738&format=png&color=38BDF8">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #c084fc;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cbd5e1;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0ea5e9;
+        }
+        .btn-secondary {
+            background-color: #475569;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #64748b;
+        }
+        .task-card {
+            background: #0f172a;
+            border-right: 5px solid #38bdf8;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+        .task-card.completed {
+            border-right-color: #22c55e;
+        }
+        .badge-done { color: #22c55e; font-weight: bold; }
+        .badge-pending { color: #eab308; font-weight: bold; }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .hidden { display: none; }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .link-btn {
+            background: none;
+            border: none;
+            color: #38bdf8;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            margin-top: 10px;
+            font-size: 13px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>MY TASK MANAGER</h1>
+    <div class="subtitle">✨ تصميم وتطوير: محمد يوسف (MY) ✨</div>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="auth-section">
+        <h3>تسجيل الدخول للنظام</h3>
+        <div class="form-group">
+            <label>البريد الإلكتروني أو رقم الهاتف:</label>
+            <input type="text" id="identifier" placeholder="أدخل إيميلك أو رقم هاتفك...">
+        </div>
+        <div class="form-group">
+            <label>كلمة المرور:</label>
+            <input type="password" id="password" placeholder="أدخل كلمة المرور...">
+        </div>
+        <button id="login-btn">دخول / تسجيل حساب جديد</button>
+        <div style="text-align: center; margin-top: 10px;">
+            <button id="forgot-password-link" class="link-btn">هل نسيت كلمة المرور؟</button>
+        </div>
+        <p style="text-align: center; margin-top: 15px; font-size: 13px; color: #94a3b8;">
+            (حساب الأدمن الأساسي: <b>admin</b> | كلمة المرور السرية محمية)
+        </p>
+    </div>
+<!-- شاشة استعادة كلمة المرور -->
+    <div id="forgot-section" class="hidden">
+        <h3>استعادة كلمة المرور</h3>
+        <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">أدخل بريدك الإلكتروني أو رقم هاتفك المسجل لنرسل لك كود التحقق.</p>
+        <div class="form-group">
+            <label>البريد أو الهاتف:</label>
+            <input type="text" id="reset-identifier" placeholder="أدخل إيميلك أو رقم هاتفك...">
+        </div>
+        <button id="send-code-btn">إرسال كود التحقق</button>
+        <button id="back-to-login-btn" class="btn-secondary" style="margin-top: 8px;">العودة لتسجيل الدخول</button>
+    </div>
+
+    <!-- شاشة إدخال الكود وكلمة المرور الجديدة -->
+    <div id="verify-section" class="hidden">
+        <h3>إعادة تعيين كلمة المرور</h3>
+        <p style="color: #22c55e; font-size: 13px; margin-bottom: 15px;" id="code-sent-msg"></p>
+        <div class="form-group">
+            <label>أدخل كود التحقق (المكون من 4 أرقام):</label>
+            <input type="text" id="verification-code" placeholder="أدخل الكود هنا...">
+        </div>
+        <div class="form-group">
+            <label>كلمة المرور الجديدة:</label>
+            <input type="password" id="new-password" placeholder="أدخل كلمة المرور الجديدة...">
+        </div>
+        <button id="verify-and-reset-btn">تأكيد وتغيير كلمة المرور</button>
+        <button id="cancel-reset-btn" class="btn-secondary" style="margin-top: 8px;">إلغاء</button>
+    </div>
+
+    <!-- شاشة التطبيق الرئيسية -->
+    <div id="app-section" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span id="welcome-msg" style="color: #38bdf8; font-weight: bold;"></span>
+            <button id="logout-btn" style="width: auto; background: #ef4444; color: white; margin: 0;">تسجيل خروج</button>
+        </div>
+
+        <div class="nav-buttons">
+            <button id="tab-tasks-btn">📋 عرض المهام الخاصة بي</button>
+            <button id="admin-tab-btn" class="hidden">➕ إضافة مهمة جديدة</button>
+            <button id="stats-tab-btn" class="hidden">📊 إحصائيات النظام</button>
+        </div>
+
+        <!-- تبويب المهام -->
+        <div id="tab-tasks">
+            <h3 id="tasks-header-title">قائمة المهام</h3>
+            <input type="text" id="search-box" placeholder="بحث عن مهمة بالعنوان..." style="margin-bottom: 15px;">
+            <div id="tasks-container"></div>
+        </div>
+
+        <!-- تبويب إضافة مهمة (أدمن) -->
+        <div id="tab-add" class="hidden">
+            <h3>إضافة مهمة جديدة وإسنادها لمستخدم</h3>
+            <div class="form-group">
+                <label>عنوان المهمة:</label>
+                <input type="text" id="task-title" placeholder="مثال: تطوير الواجهة">
+            </div>
+            <div class="form-group">
+                <label>وصف المهمة:</label>
+                <textarea id="task-desc" placeholder="تفاصيل المهمة..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>إسناد إلى (البريد الإلكتروني أو رقم الهاتف للمستخدم):</label>
+                <input type="text" id="task-assigned" placeholder="اكتب الإيميل أو رقم الهاتف المسجل به المستخدم...">
+            </div>
+            <button id="save-task-btn">حفظ وإسناد المهمة</button>
+        </div>
+
+        <!-- تبويب الإحصائيات (أدمن) -->
+        <div id="tab-stats" class="hidden">
+            <h3>إحصائيات النظام الشاملة</h3>
+            <div id="stats-content" style="background: #0f172a; padding: 15px; border-radius: 6px; line-height: 1.8;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let users = JSON.parse(localStorage.getItem('my_users')) || [];
+    
+    // ضبط حساب الأدمن الأساسي حصرياً
+    let adminIndex = users.findIndex(function(u) { return u.identifier === 'admin'; });
+    if (adminIndex === -1) {
+        users.push({identifier: 'admin', password: 'yousefnnoush', role: 'ADMIN'});
+    } else {
+        users[adminIndex].password = 'yousefnnoush';
+        users[adminIndex].role = 'ADMIN';
+    }
+    localStorage.setItem('my_users', JSON.stringify(users));
+let tasks = JSON.parse(localStorage.getItem('my_tasks')) || [];
+    let currentUser = JSON.parse(localStorage.getItem('my_current_user')) || null;
+    
+    // متغيرات مؤقتة لعملية إعادة التعيين
+    let tempResetUser = null;
+    let generatedCode = '';
+
+    window.onload = function() {
+        if (currentUser) {
+            showAppInterface();
+        }
+
+        document.getElementById('login-btn').onclick = handleAuth;
+        document.getElementById('logout-btn').onclick = logout;
+        document.getElementById('forgot-password-link').onclick = showForgotSection;
+        document.getElementById('send-code-btn').onclick = sendResetCode;
+        document.getElementById('back-to-login-btn').onclick = showLoginSection;
+        document.getElementById('cancel-reset-btn').onclick = showLoginSection;
+        document.getElementById('verify-and-reset-btn').onclick = verifyAndResetPassword;
+
+        document.getElementById('tab-tasks-btn').onclick = function() { switchTab('tasks'); };
+        document.getElementById('admin-tab-btn').onclick = function() { switchTab('add'); };
+        document.getElementById('stats-tab-btn').onclick = function() { switchTab('stats'); };
+        document.getElementById('save-task-btn').onclick = addNewTask;
+        document.getElementById('search-box').onkeyup = renderTasks;
+    };
+
+    function handleAuth() {
+        let iden = document.getElementById('identifier').value.trim();
+        let p = document.getElementById('password').value.trim();
+        
+        if(!iden || !p) {
+            alert('الرجاء إدخال البريد الإلكتروني/رقم الهاتف وكلمة المرور!');
+            return;
+        }
+
+        let foundUser = users.find(function(x) { return x.identifier.toLowerCase() === iden.toLowerCase(); });
+        
+        if(foundUser) {
+            if(foundUser.password === p) {
+                currentUser = foundUser;
+            } else {
+                alert('كلمة المرور غير صحيحة لهذا الحساب!');
+                return;
+            }
+        } else {
+            currentUser = {identifier: iden, password: p, role: 'USER'};
+            users.push(currentUser);
+            localStorage.setItem('my_users', JSON.stringify(users));
+            alert('تم إنشاء حساب جديد بنجاح وتسجيل الدخول!');
+        }
+
+        localStorage.setItem('my_current_user', JSON.stringify(currentUser));
+        showAppInterface();
+    }
+
+    function showForgotSection() {
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('forgot-section').classList.remove('hidden');
+    }
+
+    function showLoginSection() {
+        document.getElementById('forgot-section').classList.add('hidden');
+        document.getElementById('verify-section').classList.add('hidden');
+        document.getElementById('auth-section').classList.remove('hidden');
+    }
+
+    function sendResetCode() {
+        let iden = document.getElementById('reset-identifier').value.trim();
+        if(!iden) {
+            alert('الرجاء إدخال البريد الإلكتروني أو رقم الهاتف!');
+            return;
+        }
+
+        let found = users.find(function(x) { return x.identifier.toLowerCase() === iden.toLowerCase(); });
+        if(!found) {
+            alert('هذا الحساب غير مسجل في النظام!');
+            return;
+        }
+
+        tempResetUser = found;
+        // توليد كود تحقق عشوائي من 4 أرقام
+        generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+        // محاكاة إرسال الكود عبر رسالة واضحة للمستخدم
+        document.getElementById('code-sent-msg').innerText = 'تم إرسال كود التحقق بنجاح إلى: ' + found.identifier;
+        alert('📩 [محاكاة الإيميل/الرسالة]\nكود التحقق الخاص بك لإعادة تعيين كلمة المرور هو: ' + generatedCode);
+
+        document.getElementById('forgot-section').classList.add('hidden');
+        document.getElementById('verify-section').classList.remove('hidden');
+    }
+
+    function verifyAndResetPassword() {
+        let enteredCode = document.getElementById('verification-code').value.trim();
+        let newPass = document.getElementById('new-password').value.trim();
+if(!enteredCode || !newPass) {
+            alert('الرجاء إدخال كود التحقق وكلمة المرور الجديدة!');
+            return;
+        }
+
+        if(enteredCode !== generatedCode) {
+            alert('كود التحقق غير صحيح! تأكد من الكود المرسل.');
+            return;
+        }
+
+        // تحديث كلمة المرور في مصفوفة المستخدمين
+        let targetUser = users.find(function(x) { return x.identifier.toLowerCase() === tempResetUser.identifier.toLowerCase(); });
+        if(targetUser) {
+            targetUser.password = newPass;
+            localStorage.setItem('my_users', JSON.stringify(users));
+            alert('تم تغيير كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.');
+            showLoginSection();
+        }
+    }
+
+    function showAppInterface() {
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('forgot-section').classList.add('hidden');
+        document.getElementById('verify-section').classList.add('hidden');
+        document.getElementById('app-section').classList.remove('hidden');
+        document.getElementById('welcome-msg').innerText = 'أهلاً بك، ' + currentUser.identifier + ' (' + currentUser.role + ')';
+
+        if(currentUser.role === 'ADMIN') {
+            document.getElementById('admin-tab-btn').classList.remove('hidden');
+            document.getElementById('stats-tab-btn').classList.remove('hidden');
+            document.getElementById('tasks-header-title').innerText = 'قائمة كل مهام النظام (لوحة التحكم)';
+        } else {
+            document.getElementById('admin-tab-btn').classList.add('hidden');
+            document.getElementById('stats-tab-btn').classList.add('hidden');
+            document.getElementById('tasks-header-title').innerText = 'المهام المسندة إليك';
+        }
+        renderTasks();
+    }
+
+    function logout() {
+        currentUser = null;
+        localStorage.removeItem('my_current_user');
+        document.getElementById('auth-section').classList.remove('hidden');
+        document.getElementById('app-section').classList.add('hidden');
+        document.getElementById('identifier').value = '';
+        document.getElementById('password').value = '';
+    }
+
+    function switchTab(tab) {
+        document.getElementById('tab-tasks').classList.add('hidden');
+        document.getElementById('tab-add').classList.add('hidden');
+        document.getElementById('tab-stats').classList.add('hidden');
+
+        if(tab === 'tasks') document.getElementById('tab-tasks').classList.remove('hidden');
+        if(tab === 'add') document.getElementById('tab-add').classList.remove('hidden');
+        if(tab === 'stats') {
+            document.getElementById('tab-stats').classList.remove('hidden');
+            renderStats();
+        }
+    }
+
+    function renderTasks() {
+        let container = document.getElementById('tasks-container');
+        let searchKeyword = document.getElementById('search-box').value.toLowerCase();
+        container.innerHTML = '';
+
+        let filtered = tasks.filter(function(t) {
+            let matchesUser = (currentUser.role === 'ADMIN' || t.assignedTo.toLowerCase() === currentUser.identifier.toLowerCase());
+            let matchesSearch = t.title.toLowerCase().includes(searchKeyword);
+            return matchesUser && matchesSearch;
+        });
+
+        if(filtered.length === 0) {
+            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">لا توجد مهام مسجلة أو مسندة إليك حالياً.</p>';
+            return;
+        }
+
+        filtered.forEach(function(t) {
+            let card = document.createElement('div');
+            card.className = 'task-card ' + (t.isCompleted ? 'completed' : '');
+            
+            let actionsHtml = '<div style="margin-top: 10px; display: flex; gap: 10px;">';
+            if (!t.isCompleted) {
+actionsHtml += '<button class="complete-btn" data-id="' + t.id + '" style="margin:0; padding:5px 10px; background:#22c55e; width:auto;">تحديد كمكتملة ✓</button>';
+            }
+            if (currentUser.role === 'ADMIN') {
+                actionsHtml += '<button class="delete-btn btn-danger" data-id="' + t.id + '" style="margin:0; padding:5px 10px; width:auto;">حذف المهمة</button>';
+            }
+            actionsHtml += '</div>';
+
+            card.innerHTML = 
+                '<h4>رقم المهمة: #' + t.id + ' - ' + t.title + '</h4>' +
+                '<p><b>الوصف:</b> ' + t.description + '</p>' +
+                '<p><b>مسندة إلى:</b> <span style="color: #38bdf8;">' + t.assignedTo + '</span></p>' +
+                '<p><b>الحالة:</b> <span class="' + (t.isCompleted ? 'badge-done' : 'badge-pending') + '">' + (t.isCompleted ? 'مكتملة ✓' : 'قيد التنفيذ ⏳') + '</span></p>' +
+                actionsHtml;
+            container.appendChild(card);
+        });
+
+        var compBtns = document.querySelectorAll('.complete-btn');
+        for(var i = 0; i < compBtns.length; i++) {
+            compBtns[i].onclick = function() {
+                completeTask(parseInt(this.getAttribute('data-id')));
+            };
+        }
+
+        var delBtns = document.querySelectorAll('.delete-btn');
+        for(var j = 0; j < delBtns.length; j++) {
+            delBtns[j].onclick = function() {
+                deleteTask(parseInt(this.getAttribute('data-id')));
+            };
+        }
+    }
+
+    function addNewTask() {
+        let title = document.getElementById('task-title').value.trim();
+        let desc = document.getElementById('task-desc').value.trim();
+        let assigned = document.getElementById('task-assigned').value.trim();
+
+        if(!title || !assigned) {
+            alert('الرجاء إدخال العنوان وإيميل/رقم هاتف المستخدم المراد إسناد المهمة إليه!');
+            return;
+        }
+
+        let newId = tasks.length > 0 ? tasks[tasks.length - 1].id + 1 : 1;
+        tasks.push({ id: newId, title: title, description: desc, assignedTo: assigned, isCompleted: false });
+        
+        localStorage.setItem('my_tasks', JSON.stringify(tasks));
+        document.getElementById('task-title').value = '';
+        document.getElementById('task-desc').value = '';
+        document.getElementById('task-assigned').value = '';
+        
+        alert('تم إضافة وإسناد المهمة بنجاح!');
+        switchTab('tasks');
+        renderTasks();
+    }
+
+    function completeTask(id) {
+        let task = tasks.find(function(t) { return t.id === id; });
+        if(task) {
+            task.isCompleted = true;
+            localStorage.setItem('my_tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+    }
+
+    function deleteTask(id) {
+        tasks = tasks.filter(function(t) { return t.id !== id; });
+        localStorage.setItem('my_tasks', JSON.stringify(tasks));
+        renderTasks();
+    }
+
+    function renderStats() {
+        let total = tasks.length;
+        let completed = tasks.filter(function(t) { return t.isCompleted; }).length;
+        let pending = total - completed;
+        let usersCount = users.length;
+
+        document.getElementById('stats-content').innerHTML = 
+            '👥 إجمالي المستخدمين المسجلين: <b>' + usersCount + '</b><br>' +
+            '📝 إجمالي المهام في النظام: <b>' + total + '</b><br>' +
+            '✅ المهام المنجزة: <b style="color:#22c55e;">' + completed + '</b><br>' +
+            '⏳ المهام قيد التنفيذ: <b style="color:#eab308;">' + pending + '</b><br>';
+    }
+</script>
+
+</body>
+</html>
